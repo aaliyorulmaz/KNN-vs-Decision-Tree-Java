@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Analizi | KNN &amp; Decision Tree</title>
+    <meta name="description" content="KNN ve Karar Ağacı algoritmalarının karşılaştırmalı analiz paneli">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Animasyonlu arka plan -->
+    <div class="bg-shape shape1"></div>
+    <div class="bg-shape shape2"></div>
+    <div class="bg-shape shape3"></div>
+
+    <div class="glass-container">
+        <header>
+            <h1>Market Analizi</h1>
+            <p>KNN ve Karar Ağacı (Decision Tree) — Karşılaştırmalı Doğruluk ve Hız Analizi</p>
+        </header>
+
+        <!-- ── 1. VERİ YÜKLEME ALANI (Doküman Gereği) ───────────────────── -->
+        <section class="section-card" id="dataSection">
+            <h2 class="section-title">📂 Veri Yükleme</h2>
+            <div class="data-row">
+                <div class="input-group wide">
+                    <label for="dataPath">Veri Seti Dosya Yolu (Excel .xlsx)</label>
+                    <input type="text" id="dataPath"
+                        placeholder="C:\...\MarketSalesKocaeli.xlsx  (boş bırakırsanız varsayılan yol kullanılır)"
+                        title="Dosya yolunu manuel girin">
+                </div>
+                <div class="input-group">
+                    <label>Veri Bölünmesi</label>
+                    <div class="split-badge">%80 Eğitim &nbsp;|&nbsp; %20 Test</div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ── 2. MODEL SEÇİMİ (Doküman Gereği) ────────────────────────── -->
+        <section class="section-card" id="modelSection">
+            <h2 class="section-title">🤖 Algoritma Seçimi</h2>
+            <div class="model-selector">
+                <label class="model-option" id="optBoth">
+                    <input type="radio" name="modelChoice" value="both" checked>
+                    <span class="model-label">Her İkisi</span>
+                </label>
+                <label class="model-option" id="optKnn">
+                    <input type="radio" name="modelChoice" value="knn">
+                    <span class="model-label">Yalnızca KNN</span>
+                </label>
+                <label class="model-option" id="optDt">
+                    <input type="radio" name="modelChoice" value="dt">
+                    <span class="model-label">Yalnızca DT</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- ── 3. PARAMETRE GİRİŞ ALANI (Doküman Gereği) ───────────────── -->
+        <section class="section-card" id="paramSection">
+            <h2 class="section-title">⚙️ Parametre Girişi</h2>
+            <div class="controls">
+                <div class="input-group" id="knnParam">
+                    <label for="kValue">KNN — K (Komşu Sayısı)</label>
+                    <input type="number" id="kValue" value="5" min="1" max="50">
+                </div>
+                <div class="input-group" id="dtParam">
+                    <label for="depthValue">DT — Max Depth (Maksimum Derinlik)</label>
+                    <input type="number" id="depthValue" value="10" min="1" max="25">
+                </div>
+                <button id="runBtn" class="glow-on-hover">▶ Analizi Başlat</button>
+            </div>
+        </section>
+
+        <!-- ── 4. PERFORMANS METRİKLERİ (Doküman Gereği) ───────────────── -->
+        <section class="section-card" id="resultsSection" style="display:none;">
+            <h2 class="section-title">📊 Performans Metrikleri</h2>
+            <div class="results">
+                <div class="card result-card knn-card" id="knnCard">
+                    <h3>KNN Sonuçları</h3>
+                    <div class="metric">
+                        <span class="label">Doğruluk (Accuracy)</span>
+                        <span class="value" id="knnAcc">--%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Çalışma Süresi</span>
+                        <span class="value" id="knnTime">-- ms</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Hata Oranı</span>
+                        <span class="value" id="knnErr">--%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Bellek Kullanımı</span>
+                        <span class="value" id="knnMem">-- KB</span>
+                    </div>
+                </div>
+                <div class="card result-card dt-card" id="dtCard">
+                    <h3>Decision Tree Sonuçları</h3>
+                    <div class="metric">
+                        <span class="label">Doğruluk (Accuracy)</span>
+                        <span class="value" id="dtAcc">--%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Çalışma Süresi</span>
+                        <span class="value" id="dtTime">-- ms</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Hata Oranı</span>
+                        <span class="value" id="dtErr">--%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Bellek Kullanımı</span>
+                        <span class="value" id="dtMem">-- KB</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 5. GRAFİKLER (Doküman Gereği) ───────────────────────────── -->
+        <section class="section-card" id="chartsSection" style="display:none;">
+            <h2 class="section-title">📈 Grafikler</h2>
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <canvas id="accuracyChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="timeChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 6. HATA MATRİSİ / CONFUSION MATRIX (Doküman Gereği) ──────── -->
+        <section class="section-card" id="confusionSection" style="display:none;">
+            <h2 class="section-title">🔢 Hata Matrisi (Confusion Matrix)</h2>
+            <p class="section-desc">Satırlar: Gerçek kategori &nbsp;|&nbsp; Sütunlar: Tahmin edilen kategori &nbsp;|&nbsp; <span class="cm-legend-kv">🟪 Köşegen = Doğru tahmin</span> &nbsp;|&nbsp; <span class="cm-legend-err">🟥 Diğer = Hatalı tahmin</span></p>
+            <div class="confusion-container" id="confusionContainer"></div>
+        </section>
+
+    </div><!-- /glass-container -->
+
+    <script src="app.js"></script>
+</body>
+</html>
